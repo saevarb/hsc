@@ -1,0 +1,8 @@
+
+* Language features
+** Imports
+** Parametric polymorphism
+** Functional
+** Partial function application / currying
+** Lambdas
+* Grammar
