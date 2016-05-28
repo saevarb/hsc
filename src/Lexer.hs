@@ -8,8 +8,82 @@ import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Lexer as L
 import           Text.Megaparsec.String
 
-import           Types
+-- import           Types
 
+data Token
+    -- An integer
+    = TokenInt Integer
+    -- Equals sign: =
+    | TokenEq
+    -- Comma: ,
+    | TokenComma
+    -- Pipe: |
+    | TokenPipe
+    -- Plus operator
+    | TokenPlus
+    -- Subtraction operator
+    | TokenMinus
+    -- Multiplication operator
+    | TokenMul
+    -- Division operator
+    | TokenDiv
+    -- Logical conjunction: &&
+    | TokenAnd
+    -- Logical disjunction: ||
+    | TokenOr
+    -- Logical negation: !
+    | TokenNot
+    -- Left bracket: {
+    | TokenLB
+    -- Right bracket }
+    | TokenRB
+    -- Left parenthesis: (
+    | TokenLP
+    -- Right parenthesis: )
+    | TokenRP
+    -- Semicolon
+    | TokenSC
+    -- Colon
+    | TokenColon
+    -- The keyword "var"
+    | TokenVar
+    -- The keyword "func"
+    | TokenFunc
+    -- The keyword "end"
+    | TokenEnd
+    -- The keyword "array of"
+    | TokenArray
+    -- The keyword "record of"
+    | TokenRecord
+    -- The keyword "int"
+    | TokenIntType
+    -- The keyword "bool"
+    | TokenBoolType
+    -- The keyword "write"
+    | TokenWrite
+    -- The keyword "return"
+    | TokenReturn
+    -- The keyword "if"
+    | TokenIf
+    -- The keyword "then"
+    | TokenThen
+    -- The keyword "else"
+    | TokenElse
+    -- The keyword "allocate"
+    | TokenAllocate
+    -- The keywords "of length"
+    | TokenOfLength
+    -- The boolean constants
+    | TokenTrue
+    | TokenFalse
+    -- The null constant
+    | TokenNull
+    -- An identifier
+    | TokenId String
+    deriving Show
+
+parseError :: [Token] -> a
+parseError xs = error $ "Parse error: " ++ show xs
 
 spaceConsumer :: Parser ()
 spaceConsumer =
@@ -18,13 +92,20 @@ spaceConsumer =
     (L.skipLineComment "#")
     (L.skipBlockComment "(*" "*)")
 
--- lex :: String -> [Token]
+test :: FilePath -> IO ()
 test file = do
-    file <- readFile file
-    let res = parse (spaceConsumer >> many (choice $ map try allParsers)) "" file
+    contents <- readFile file
+    let res = parse (spaceConsumer >> many (choice $ map try allParsers)) "" contents
     case res of
         Left e -> print e
         Right v -> mapM_ print v
+
+lexer :: String -> [Token]
+lexer str = do
+    let res = parse (spaceConsumer >> many (choice $ map try allParsers)) "" str
+    case res of
+        Left e -> error $ show e
+        Right v -> v
 
 allParsers :: [Parser Token]
 allParsers =
@@ -40,6 +121,7 @@ allParsers =
     , rbP
     , lpP
     , rpP
+    , pipeP
     , semicolonP
     , colonP
     , varP
@@ -48,12 +130,19 @@ allParsers =
     , intP
     , boolP
     , returnP
+    , trueP
+    , falseP
+    , nullP
+    , writeP
+    , ofLengthP
     , orP
     , andP
     , notP
     , ifP
     , thenP
     , elseP
+    , allocateP
+    , commaP
     -- Must be last
     , idP
     ]
@@ -102,6 +191,15 @@ funcP = symbol "func" >> return TokenFunc
 endP :: Parser Token
 endP = symbol "end" >> return TokenEnd
 
+trueP :: Parser Token
+trueP = symbol "true" >> return TokenTrue
+
+falseP :: Parser Token
+falseP = symbol "false" >> return TokenFalse
+
+nullP :: Parser Token
+nullP = symbol "null" >> return TokenNull
+
 arrayP :: Parser Token
 arrayP  = symbol "array of" >> return TokenArray
 
@@ -120,6 +218,15 @@ boolP = symbol "bool" >> return TokenBoolType
 returnP :: Parser Token
 returnP = symbol "return" >> return TokenReturn
 
+writeP :: Parser Token
+writeP = symbol "write" >> return TokenWrite
+
+allocateP :: Parser Token
+allocateP = symbol "allocate" >> return TokenAllocate
+
+ofLengthP :: Parser Token
+ofLengthP = symbol "of length" >> return TokenOfLength
+
 ifP :: Parser Token
 ifP = symbol "if" >> return TokenIf
 
@@ -136,10 +243,10 @@ minusP :: Parser Token
 minusP = symbol "-" >> return TokenMinus
 
 divP :: Parser Token
-divP = symbol "*" >> return TokenDiv
+divP = symbol "*" >> return TokenMul
 
 mulP :: Parser Token
-mulP = symbol "/" >> return TokenMul
+mulP = symbol "/" >> return TokenDiv
 
 orP :: Parser Token
 orP = symbol "||" >> return TokenOr
@@ -150,6 +257,11 @@ andP = symbol "&&" >> return TokenAnd
 notP :: Parser Token
 notP = symbol "!" >> return TokenNot
 
+commaP :: Parser Token
+commaP = symbol "," >> return TokenComma
+
+pipeP :: Parser Token
+pipeP = symbol "|" >> return TokenPipe
 
 
 -- Bogus function for reminding me if I'm missing

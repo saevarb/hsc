@@ -1,5 +1,12 @@
 module Main where
+import Parser
+import Lexer
 
 main :: IO ()
 main = do
-  putStrLn "hello world"
+    contents <- getContents
+    let lexed = lexer contents
+    putStrLn "Lexed:"
+    print lexed
+    putStrLn "Parsed:"
+    print . parseProgram $ lexed

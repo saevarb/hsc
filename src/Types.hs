@@ -1,8 +1,5 @@
 module Types where
 
-parseError :: [Token] -> a
-parseError _ = error "Parse error"
-
 data BinOp
     = Add
     | Sub
@@ -23,66 +20,25 @@ data Var
 data Exp
     = BinExp Exp BinOp Exp
     | UnExp Exp UnOp
-    | VarExp
+    | AppExp String [Exp]
+    | VarExp Var
     | AbsExp Exp
-    | ConstExp Int
+    | ConstExp Integer
     | BoolExp Bool
-    | Null
+    | NullExp
     deriving Show
 
-data Token
-    -- An integer
-    = TokenInt Integer
-    -- Equals sign: =
-    | TokenEq
-    -- Plus operator
-    | TokenPlus
-    -- Subtraction operator
-    | TokenMinus
-    -- Multiplication operator
-    | TokenMul
-    -- Division operator
-    | TokenDiv
-    -- Logical conjunction: &&
-    | TokenAnd
-    -- Logical disjunction: ||
-    | TokenOr
-    -- Logical negation: !
-    | TokenNot
-    -- Left bracket: {
-    | TokenLB
-    -- Right bracket }
-    | TokenRB
-    -- Left parenthesis: (
-    | TokenLP
-    -- Right parenthesis: )
-    | TokenRP
-    -- Semicolon
-    | TokenSC
-    -- Colon
-    | TokenColon
-    -- The keyword "var"
-    | TokenVar
-    -- The keyword "func"
-    | TokenFunc
-    -- The keyword "end"
-    | TokenEnd
-    -- The keyword "array of"
-    | TokenArray
-    -- The keyword "record of"
-    | TokenRecord
-    -- The keyword "int"
-    | TokenIntType
-    -- The keyword "bool"
-    | TokenBoolType
-    -- The keyword "return"
-    | TokenReturn
-    -- The keyword "if"
-    | TokenIf
-    -- The keyword "then"
-    | TokenThen
-    -- The keyword "else"
-    | TokenElse
-    -- An identifier
-    | TokenId String
+data Stmt
+    = RetStmt Exp
+    | WriteStmt Exp
+    | AllocStmt Var Exp
+    | AssignStmt Var Exp
+    | IfStmt Exp Stmt (Maybe Stmt)
+    | WhileStmt Exp Stmt
+    deriving Show
+
+data Decl = Decl
+    deriving Show
+
+data Body = Body [Decl] [Stmt]
     deriving Show
