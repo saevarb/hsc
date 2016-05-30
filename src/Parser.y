@@ -86,4 +86,6 @@ Exp :: { Exp }
 Var : id  { VarId $1 }
 {
 
+parseError e = error $ show e
+
 }
