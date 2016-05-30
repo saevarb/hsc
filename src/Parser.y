@@ -34,6 +34,8 @@ null     { TokenNull }
 ','      { TokenComma }
 '!'      { TokenNot }
 '|'      { TokenPipe }
+"||"      { TokenOr }
+"&&"      { TokenAnd }
 
 
 
@@ -69,6 +71,8 @@ Exp :: { Exp }
     | Exp '-' Exp        { BinExp $1 Sub $3 }
     | Exp '*' Exp        { BinExp $1 Mul $3 }
     | Exp '/' Exp        { BinExp $1 Div $3 }
+    | Exp "||" Exp       { BinExp $1 LOr $3 }
+    | Exp "&&" Exp       { BinExp $1 LAnd $3 }
     | Var                { VarExp $1 }
     | id '(' ExpList ')' { AppExp $1 $3 }
     | '(' Exp ')'        { $2 }

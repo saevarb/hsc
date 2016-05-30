@@ -5,6 +5,8 @@ data BinOp
     | Sub
     | Div
     | Mul
+    | LAnd
+    | LOr
     deriving Show
 
 data UnOp

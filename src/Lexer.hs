@@ -121,7 +121,6 @@ allParsers =
     , rbP
     , lpP
     , rpP
-    , pipeP
     , semicolonP
     , colonP
     , varP
@@ -143,6 +142,7 @@ allParsers =
     , elseP
     , allocateP
     , commaP
+    , pipeP
     -- Must be last
     , idP
     ]
