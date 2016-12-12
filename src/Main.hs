@@ -8,5 +8,5 @@ main = do
     let lexed = lexer contents
     putStrLn "Lexed:"
     print lexed
-    putStrLn "Parsed:"
-    print . parseProgram $ lexed
+    -- putStrLn "Parsed:"
+    -- print . parseProgram $ lexed

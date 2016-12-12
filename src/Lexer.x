@@ -1,72 +1,107 @@
 {
 module Lexer (lexer, Token(..)) where
+
+import Control.Monad.Trans
 }
 
-%wrapper "basic"
+%wrapper "monadUserState"
 
 $digit = 0-9			-- digits
 $alpha = [a-zA-Z]		-- alphabetic characters
+$white = [\t ]
 
 tokens :-
 
+  \n   { incNewlines }
   $white+	;
   "#".*		;
-  "("  { \s -> TokenLP }
-  ")"  { \s -> TokenRP }
-  "{"  { \s -> TokenLB }
-  "}"  { \s -> TokenRB }
-  "["  { \s -> TokenLBR }
-  "]"  { \s -> TokenRBR }
-  "%"  { \s -> TokenMod }
-  ","  { \s -> TokenComma }
-  ";"  { \s -> TokenSC }
-  "="  { \s -> TokenAssign }
-  "."  { \s -> TokenDot }
-  "!"  { \s -> TokenNot }
-  "|"  { \s -> TokenPipe }
-  ":"  { \s -> TokenColon }
-  "+"  { \s -> TokenPlus }
-  "-"  { \s -> TokenMinus }
-  "*"  { \s -> TokenMul }
-  "/"  { \s -> TokenDiv }
-  "==" { \s -> TokenEq }
-  "!=" { \s -> TokenNotEq }
-  "<"  { \s -> TokenLT }
-  ">"  { \s -> TokenGT }
-  "<=" { \s -> TokenLTE }
-  ">=" { \s -> TokenGTE }
-  "&&" { \s -> TokenAnd }
-  "||" { \s -> TokenOr }
+  "("  { just TokenLP }
+  ")"  { just TokenRP }
+  "{"  { just TokenLB }
+  "}"  { just TokenRB }
+  "["  { just TokenLBR }
+  "]"  { just TokenRBR }
+  "%"  { just TokenMod }
+  ","  { just TokenComma }
+  ";"  { just TokenSC }
+  "="  { just TokenAssign }
+  "."  { just TokenDot }
+  "!"  { just TokenNot }
+  "|"  { just TokenPipe }
+  ":"  { just TokenColon }
+  "+"  { just TokenPlus }
+  "-"  { just TokenMinus }
+  "*"  { just TokenMul }
+  "/"  { just TokenDiv }
+  "==" { just TokenEq }
+  "!=" { just TokenNotEq }
+  "<"  { just TokenLT }
+  ">"  { just TokenGT }
+  "<=" { just TokenLTE }
+  ">=" { just TokenGTE }
+  "&&" { just TokenAnd }
+  "||" { just TokenOr }
 
-  $digit+     { \s -> TokenInt (read s) }
+  $digit+     { token $ \ (_, _, _, s) i -> TokenInt (read s) }
 
-  "bool"      { \s -> TokenBoolType  }
-  "int"       { \s -> TokenIntType }
-  "type"      { \s -> TokenType }
-  "array of"  { \s -> TokenArray }
-  "record of" { \s -> TokenRecord }
-  "return"    { \s -> TokenReturn }
-  "write"     { \s -> TokenWrite }
-  "var"       { \s -> TokenVar }
-  "if"        { \s -> TokenIf }
-  "then"      { \s -> TokenThen }
-  "else"      { \s -> TokenElse }
-  "while"     { \s -> TokenWhile }
-  "do"        { \s -> TokenDo }
-  "allocate"  { \s -> TokenAllocate }
-  "of length" { \s -> TokenOfLength }
-  "true"      { \s -> TokenTrue }
-  "false"     { \s -> TokenFalse }
-  "func"      { \s -> TokenFunc }
-  "end"       { \s -> TokenEnd }
+  "bool"      { just TokenBoolType  }
+  "int"       { just TokenIntType }
+  "type"      { just TokenType }
+  "array of"  { just TokenArray }
+  "record of" { just TokenRecord }
+  "return"    { just TokenReturn }
+  "write"     { just TokenWrite }
+  "var"       { just TokenVar }
+  "if"        { just TokenIf }
+  "then"      { just TokenThen }
+  "else"      { just TokenElse }
+  "while"     { just TokenWhile }
+  "do"        { just TokenDo }
+  "allocate"  { just TokenAllocate }
+  "of length" { just TokenOfLength }
+  "true"      { just TokenTrue }
+  "false"     { just TokenFalse }
+  "func"      { just TokenFunc }
+  "end"       { just TokenEnd }
 
-  $alpha [$alpha $digit \_ \']*		{ \s -> TokenId s }
+  $alpha [$alpha $digit \_ \']*		{ token $ \ (_, _, _, s) i -> TokenId s }
 
 {
 -- Each action has type :: String -> Token
 
+data AlexUserState
+    = AlexUserState
+    { newlines :: Int
+    }
+
+alexInitUserState = AlexUserState 0
+
+alexEOF = error "EOF"
+
+-- Why doesn't `token` do this? What is it even useful for?
+just :: Token -> AlexInput -> Int -> Alex Token
+just t _ _ = return t
+
 lexer :: String -> [Token]
-lexer = alexScanTokens
+lexer s =
+    let res = runAlex s alexMonadScan
+    in case res of
+            Left e -> error e
+            Right t -> [t]
+
+getNewlines :: Alex Int
+getNewlines = newlines <$> alexGetUserState
+
+setNewlines :: Int -> Alex ()
+setNewlines n = do
+    s <- alexGetUserState
+    alexSetUserState $ s { newlines = n}
+
+/* incNewlines :: Alex () */
+incNewlines s i = do
+    n <- getNewlines
+    setNewlines (n + 1)
+    skip s i
 
 -- The token type:
 data Token
