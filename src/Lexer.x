@@ -42,7 +42,7 @@ tokens :-
   "&&" { just TokenAnd }
   "||" { just TokenOr }
 
-  $digit+     { token $ \ (_, _, _, s) i -> TokenInt (read s) }
+  $digit+     { token $ \ (_, _, _, s) i -> TokenInt (read $ take i s) }
 
   "bool"      { just TokenBoolType  }
   "int"       { just TokenIntType }
