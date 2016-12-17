@@ -3,13 +3,16 @@ module Parser where
 
 import Data.Char
 
-import Types
 import Lexer
+import Types
+
 }
 
 %name parseProgram
-%tokentype { Token }
 %error { parseError }
+%lexer { lexer } {TokenEOF}
+%monad {Alex}
+%tokentype { Token }
 %token
 id       { TokenId $$ }
 num      { TokenInt $$ }
@@ -86,6 +89,6 @@ Exp :: { Exp }
 Var : id  { VarId $1 }
 {
 
-parseError e = error $ show e
+parseError e = alexError $ "Parse error: " ++ show e
 
 }

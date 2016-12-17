@@ -1,5 +1,5 @@
 {
-module Lexer (lexer, Token(..)) where
+module Lexer where
 
 import Control.Monad.Trans
 }
@@ -12,7 +12,7 @@ $white = [\t ]
 
 tokens :-
 
-  \n   { incNewlines }
+--  \n   { incNewlines }
   $white+	;
   "#".*		;
   "("  { just TokenLP }
@@ -76,32 +76,29 @@ data AlexUserState
 
 alexInitUserState = AlexUserState 0
 
-alexEOF = error "EOF"
+alexEOF = return TokenEOF
 
 -- Why doesn't `token` do this? What is it even useful for?
 just :: Token -> AlexInput -> Int -> Alex Token
 just t _ _ = return t
 
-lexer :: String -> [Token]
-lexer s =
-    let res = runAlex s alexMonadScan
-    in case res of
-            Left e -> error e
-            Right t -> [t]
+lexer :: (Token -> Alex a) -> Alex a
+lexer = (alexMonadScan >>=)
 
-getNewlines :: Alex Int
-getNewlines = newlines <$> alexGetUserState
 
-setNewlines :: Int -> Alex ()
-setNewlines n = do
-    s <- alexGetUserState
-    alexSetUserState $ s { newlines = n}
+
+/* getNewlines :: Alex Int */
+/* getNewlines = newlines <$> alexGetUserState */
+
+/* setNewlines :: Int -> Alex () */
+/* setNewlines n = do */
+/*     s <- alexGetUserState */
+/*     alexSetUserState $ s { newlines = n} */
 
 /* incNewlines :: Alex () */
-incNewlines s i = do
-    n <- getNewlines
-    setNewlines (n + 1)
-    skip s i
+/* incNewlines = do */
+/*     n <- getNewlines */
+/*     setNewlines (n + 1) */
 
 -- The token type:
 data Token
@@ -200,6 +197,7 @@ data Token
     | TokenNull
     -- An identifier
     | TokenId String
+    | TokenEOF
     deriving (Show, Eq)
 
 }

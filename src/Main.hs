@@ -5,8 +5,9 @@ import Lexer
 main :: IO ()
 main = do
     contents <- getContents
-    let lexed = lexer contents
-    putStrLn "Lexed:"
-    print lexed
-    -- putStrLn "Parsed:"
+    let parsed = runAlex contents parseProgram
+    -- putStrLn "Lexed:"
+    -- print lexed
+    putStrLn "Parsed:"
+    print parsed
     -- print . parseProgram $ lexed
