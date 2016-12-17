@@ -11,3 +11,4 @@ main = do
     putStrLn "Parsed:"
     print parsed
     -- print . parseProgram $ lexed
+    

@@ -14,9 +14,9 @@ data UnOp
     deriving Show
 
 data Var
-    = VarId String
-    | VarOffset Var Exp
-    | VarDot Var String
+    = Var Identifier
+    | VarOffset Identifier Exp
+    | VarDot Identifier Var
     deriving (Show)
 
 data Exp
@@ -39,8 +39,17 @@ data Stmt
     | WhileStmt Exp Stmt
     deriving Show
 
-data Decl = Decl
+data Decl
+    = VarDecl Identifier Identifier
+    | VarDecls [Decl]
+    | TypeDecl Identifier Identifier
+    | FunDecl
     deriving Show
 
 data Body = Body [Decl] [Stmt]
+    deriving Show
+
+data Identifier
+    = TypeId String
+    | VarId String
     deriving Show

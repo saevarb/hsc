@@ -14,6 +14,7 @@ import Types
 %monad {Alex}
 %tokentype { Token }
 %token
+var      { TokenVar }
 id       { TokenId $$ }
 num      { TokenInt $$ }
 return   { TokenReturn }
@@ -25,8 +26,9 @@ else     { TokenElse }
 true     { TokenTrue }
 false    { TokenElse }
 null     { TokenNull }
+"type"   { TokenType }
 "of length" { TokenOfLength }
-'='      { TokenEq }
+'='      { TokenAssign }
 '+'      { TokenPlus }
 '-'      { TokenMinus }
 '*'      { TokenMul }
@@ -34,9 +36,11 @@ null     { TokenNull }
 '('      { TokenLP }
 ')'      { TokenRP }
 ';'      { TokenSC }
+':'      { TokenColon }
 ','      { TokenComma }
 '!'      { TokenNot }
 '|'      { TokenPipe }
+"=="      { TokenEq }
 "||"      { TokenOr }
 "&&"      { TokenAnd }
 
@@ -48,13 +52,30 @@ null     { TokenNull }
 %right '!'
 %%
 
-Body : DeclList StmtList { Body $1 $2 }
+Body : DeclList StmtList { Body (concatDecls $1) $2 }
 
-DeclList : { [] }
+DeclList :: { [Decl] }
+: DeclList Decl ';' { $2 : $1 }
+| { [] }
+
+Decl :: { Decl }
+: var VarDeclList { VarDecls $2 } 
+| TypeDecl { $1 }
+
+VarDeclList :: { [Decl] }
+: VarType { [$1] }
+| VarDeclList ',' VarType { $3 : $1 }
+|  { [] }
+
+VarType :: { Decl }
+VarType : VarId ':' TypeId { VarDecl $1 $3 }
+
+TypeDecl :: { Decl }
+: "type" TypeId '=' TypeId  { TypeDecl $2 $4 }
 
 StmtList :: { [Stmt] }
-    : Stmt      { [$1] }
-    | StmtList Stmt  { $2 : $1 }
+: Stmt          { [$1] }
+| StmtList Stmt { $2 : $1 }
 
 Stmt : Stmt1 ';' { $1 }
 
@@ -86,9 +107,19 @@ Exp :: { Exp }
     | false              { BoolExp False }
     | num                { ConstExp $1 }
 
-Var : id  { VarId $1 }
+VarId : id { VarId $1 }
+TypeId : id { TypeId $1 }
+
+Var : VarId { Var $1 }
+
 {
 
-parseError e = alexError $ "Parse error: " ++ show e
+
+concatDecls = concatMap expand
+  where
+    expand (VarDecls ds) = ds
+    expand e = [e]
+
+parseError e = alexError $ "Goddammit: " ++ show e
 
 }

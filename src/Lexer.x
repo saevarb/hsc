@@ -8,13 +8,13 @@ import Control.Monad.Trans
 
 $digit = 0-9			-- digits
 $alpha = [a-zA-Z]		-- alphabetic characters
-$white = [\t ]
 
 tokens :-
 
---  \n   { incNewlines }
+  \n      ;
   $white+	;
   "#".*		;
+
   "("  { just TokenLP }
   ")"  { just TokenRP }
   "{"  { just TokenLB }
@@ -44,8 +44,6 @@ tokens :-
 
   $digit+     { token $ \ (_, _, _, s) i -> TokenInt (read $ take i s) }
 
-  "bool"      { just TokenBoolType  }
-  "int"       { just TokenIntType }
   "type"      { just TokenType }
   "array of"  { just TokenArray }
   "record of" { just TokenRecord }
@@ -64,7 +62,7 @@ tokens :-
   "func"      { just TokenFunc }
   "end"       { just TokenEnd }
 
-  $alpha [$alpha $digit \_ \']*		{ token $ \ (_, _, _, s) i -> TokenId s }
+  $alpha [$alpha $digit \_ \']*		{ token $ \ (_, _, _, s) i -> TokenId $ take i s }
 
 {
 -- Each action has type :: String -> Token
@@ -87,18 +85,18 @@ lexer = (alexMonadScan >>=)
 
 
 
-/* getNewlines :: Alex Int */
-/* getNewlines = newlines <$> alexGetUserState */
+getNewlines :: Alex Int
+getNewlines = newlines <$> alexGetUserState
 
-/* setNewlines :: Int -> Alex () */
-/* setNewlines n = do */
-/*     s <- alexGetUserState */
-/*     alexSetUserState $ s { newlines = n} */
+setNewlines :: Int -> Alex ()
+setNewlines n = do
+    s <- alexGetUserState
+    alexSetUserState $ s { newlines = n}
 
-/* incNewlines :: Alex () */
-/* incNewlines = do */
-/*     n <- getNewlines */
-/*     setNewlines (n + 1) */
+incNewlines :: Alex ()
+incNewlines = do
+    n <- getNewlines
+    setNewlines (n + 1)
 
 -- The token type:
 data Token
