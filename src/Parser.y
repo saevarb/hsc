@@ -14,35 +14,35 @@ import Types
 %monad {Alex}
 %tokentype { Token }
 %token
-var      { TokenVar }
-id       { TokenId $$ }
-num      { TokenInt $$ }
-return   { TokenReturn }
-allocate { TokenAllocate }
-write    { TokenWrite }
-if       { TokenIf }
-then     { TokenThen }
-else     { TokenElse }
-true     { TokenTrue }
-false    { TokenElse }
-null     { TokenNull }
-"type"   { TokenType }
+var         { TokenVar }
+id          { TokenId $$ }
+num         { TokenInt $$ }
+return      { TokenReturn }
+allocate    { TokenAllocate }
+write       { TokenWrite }
+if          { TokenIf }
+then        { TokenThen }
+else        { TokenElse }
+true        { TokenTrue }
+false       { TokenElse }
+null        { TokenNull }
+"type"      { TokenType }
 "of length" { TokenOfLength }
-'='      { TokenAssign }
-'+'      { TokenPlus }
-'-'      { TokenMinus }
-'*'      { TokenMul }
-'/'      { TokenDiv }
-'('      { TokenLP }
-')'      { TokenRP }
-';'      { TokenSC }
-':'      { TokenColon }
-','      { TokenComma }
-'!'      { TokenNot }
-'|'      { TokenPipe }
-"=="      { TokenEq }
-"||"      { TokenOr }
-"&&"      { TokenAnd }
+'='         { TokenAssign }
+'+'         { TokenPlus }
+'-'         { TokenMinus }
+'*'         { TokenMul }
+'/'         { TokenDiv }
+'('         { TokenLP }
+')'         { TokenRP }
+';'         { TokenSC }
+':'         { TokenColon }
+','         { TokenComma }
+'!'         { TokenNot }
+'|'         { TokenPipe }
+"=="        { TokenEq }
+"||"        { TokenOr }
+"&&"        { TokenAnd }
 
 
 
@@ -77,13 +77,14 @@ StmtList :: { [Stmt] }
 : Stmt          { [$1] }
 | StmtList Stmt { $2 : $1 }
 
-Stmt : Stmt1 ';' { $1 }
-
-Stmt1 :: { Stmt }
-    : allocate Var                 { AllocStmt $2 (ConstExp 1) }
-    | allocate Var "of length" Exp { AllocStmt $2 $4 }
-    | return Exp                   { RetStmt $2 }
-    | write Exp                    { WriteStmt $2 }
+Stmt :: { Stmt }
+    : allocate Var                 ';' { AllocStmt $2 (ConstExp 1) }
+    | allocate Var "of length" Exp ';' { AllocStmt $2 $4 }
+    | return Exp ';'                  { RetStmt $2 }
+    | write Exp  ';'                  { WriteStmt $2 }
+| Var '=' Exp ';' { AssignStmt $1 $3 }
+| if Exp then Stmt else Stmt { IfStmt $2 $4 (Just $6) }
+| if Exp then Stmt { IfStmt $2 $4 Nothing }
 
 ExpList :: { [Exp] }
     :             { [] }
@@ -97,6 +98,7 @@ Exp :: { Exp }
     | Exp '/' Exp        { BinExp $1 Div $3 }
     | Exp "||" Exp       { BinExp $1 LOr $3 }
     | Exp "&&" Exp       { BinExp $1 LAnd $3 }
+    | Exp "==" Exp       { BinExp $1 LEq $3 }
     | Var                { VarExp $1 }
     | id '(' ExpList ')' { AppExp $1 $3 }
     | '(' Exp ')'        { $2 }
@@ -120,6 +122,14 @@ concatDecls = concatMap expand
     expand (VarDecls ds) = ds
     expand e = [e]
 
-parseError e = alexError $ "Goddammit: " ++ show e
+parseError e = do
+    (pos, pc, _, inp)<- alexGetInput
+    alexError $ unlines
+      [ ""
+      , formatLocationInfo pos ++ " - error: " ++ show e
+      , "\t... " ++ (take 50 inp) ++ " ..."
+      ]
+  where
+    formatLocationInfo (AlexPn _ l c) = concat [show l, ":", show c]
 
 }

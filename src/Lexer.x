@@ -11,7 +11,7 @@ $alpha = [a-zA-Z]		-- alphabetic characters
 
 tokens :-
 
-  \n      ;
+  \n      { incNewlines }
   $white+	;
   "#".*		;
 
@@ -93,10 +93,11 @@ setNewlines n = do
     s <- alexGetUserState
     alexSetUserState $ s { newlines = n}
 
-incNewlines :: Alex ()
-incNewlines = do
+-- incNewlines :: Alex ()
+incNewlines inp len = do
     n <- getNewlines
     setNewlines (n + 1)
+    skip inp len
 
 -- The token type:
 data Token

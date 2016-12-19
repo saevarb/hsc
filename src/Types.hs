@@ -7,6 +7,7 @@ data BinOp
     | Mul
     | LAnd
     | LOr
+    | LEq
     deriving Show
 
 data UnOp
