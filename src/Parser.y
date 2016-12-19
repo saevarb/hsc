@@ -23,10 +23,12 @@ write       { TokenWrite }
 if          { TokenIf }
 then        { TokenThen }
 else        { TokenElse }
+while       { TokenWhile }
+do          { TokenDo }
 true        { TokenTrue }
-false       { TokenElse }
+false       { TokenFalse }
 null        { TokenNull }
-"type"      { TokenType }
+type        { TokenType }
 "of length" { TokenOfLength }
 '='         { TokenAssign }
 '+'         { TokenPlus }
@@ -71,20 +73,22 @@ VarType :: { Decl }
 VarType : VarId ':' TypeId { VarDecl $1 $3 }
 
 TypeDecl :: { Decl }
-: "type" TypeId '=' TypeId  { TypeDecl $2 $4 }
+: type TypeId '=' TypeId  { TypeDecl $2 $4 }
 
 StmtList :: { [Stmt] }
 : Stmt          { [$1] }
 | StmtList Stmt { $2 : $1 }
 
 Stmt :: { Stmt }
-    : allocate Var                 ';' { AllocStmt $2 (ConstExp 1) }
-    | allocate Var "of length" Exp ';' { AllocStmt $2 $4 }
-    | return Exp ';'                  { RetStmt $2 }
-    | write Exp  ';'                  { WriteStmt $2 }
+: allocate Var                 ';' { AllocStmt $2 (ConstExp 1) }
+| allocate Var "of length" Exp ';' { AllocStmt $2 $4 }
+| return Exp ';'                  { RetStmt $2 }
+| write Exp  ';'                  { WriteStmt $2 }
 | Var '=' Exp ';' { AssignStmt $1 $3 }
 | if Exp then Stmt else Stmt { IfStmt $2 $4 (Just $6) }
 | if Exp then Stmt { IfStmt $2 $4 Nothing }
+| while Exp do Stmt { WhileStmt $2 $4 }
+
 
 ExpList :: { [Exp] }
     :             { [] }
