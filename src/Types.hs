@@ -38,6 +38,7 @@ data Stmt
     | AssignStmt Var Exp
     | IfStmt Exp Stmt (Maybe Stmt)
     | WhileStmt Exp Stmt
+    | StmtList [Stmt]
     deriving Show
 
 data Decl

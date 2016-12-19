@@ -37,9 +37,14 @@ type        { TokenType }
 '/'         { TokenDiv }
 '('         { TokenLP }
 ')'         { TokenRP }
+'{'         { TokenLB }
+'}'         { TokenRB }
+'['         { TokenLBR }
+']'         { TokenRBR }
 ';'         { TokenSC }
 ':'         { TokenColon }
 ','         { TokenComma }
+'.'         { TokenDot }
 '!'         { TokenNot }
 '|'         { TokenPipe }
 "=="        { TokenEq }
@@ -88,6 +93,7 @@ Stmt :: { Stmt }
 | if Exp then Stmt else Stmt { IfStmt $2 $4 (Just $6) }
 | if Exp then Stmt { IfStmt $2 $4 Nothing }
 | while Exp do Stmt { WhileStmt $2 $4 }
+| '{' StmtList '}' { StmtList $2 }
 
 
 ExpList :: { [Exp] }
@@ -116,7 +122,10 @@ Exp :: { Exp }
 VarId : id { VarId $1 }
 TypeId : id { TypeId $1 }
 
-Var : VarId { Var $1 }
+Var :: { Var }
+: VarId { Var $1 }
+| VarId '[' Exp ']' { VarOffset $1 $3 }
+| VarId '.' Var { VarDot $1 $3 }
 
 {
 
