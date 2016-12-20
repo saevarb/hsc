@@ -1,6 +1,7 @@
 {
 module Parser where
 
+import Prelude hiding (LT, GT)
 import Data.Char
 
 import Lexer
@@ -54,6 +55,10 @@ end         { TokenEnd }
 "=="        { TokenEq }
 "||"        { TokenOr }
 "&&"        { TokenAnd }
+'<'         { TokenLT }
+"<="        { TokenLTE }
+'>'         { TokenGT }
+">="        { TokenGTE }
 
 
 
@@ -66,16 +71,16 @@ end         { TokenEnd }
 Body : DeclList StmtList { Body (concatDecls $1) $2 }
 
 DeclList :: { [Decl] }
-: DeclList Decl ';' { $2 : $1 }
+: DeclList Decl { $2 : $1 }
 | { [] }
 
 Decl :: { Decl }
-: var VarDeclList { VarDecls $2 } 
-| TypeDecl { $1 }
+: var VarDeclList ';' { VarDecls $2 } 
+| TypeDecl ';' { $1 }
 | FuncDecl { $1 }
 
 FuncDecl :: { Decl }
-: func VarId '(' VarDeclList ')' ':' Type Body end VarId {  FunDecl $2 $4 $8 $7 }
+: func VarId '(' VarDeclList ')' ':' Type Body end VarId {%  assert "func: end /= start" ($2 == $10) (FunDecl $2 $4 $8 $7) }
 
 VarDeclList :: { [Decl] }
 : VarType { [$1] }
@@ -86,7 +91,7 @@ VarType :: { Decl }
 VarType : VarId ':' TypeId { VarDecl $1 $3 }
 
 TypeDecl :: { Decl }
-: type TypeId '=' TypeId  { TypeDecl $2 $4 }
+: type VarId '=' TypeId  { TypeDecl $2 $4 }
 
 StmtList :: { [Stmt] }
 : Stmt          { [$1] }
@@ -116,7 +121,11 @@ Exp :: { Exp }
     | Exp '/' Exp        { BinExp $1 Div $3 }
     | Exp "||" Exp       { BinExp $1 LOr $3 }
     | Exp "&&" Exp       { BinExp $1 LAnd $3 }
-    | Exp "==" Exp       { BinExp $1 LEq $3 }
+    | Exp "==" Exp       { BinExp $1 Eq $3 }
+    | Exp '<' Exp        { BinExp $1 LT $3 }
+    | Exp "<=" Exp       { BinExp $1 LTE $3 }
+    | Exp '>' Exp        { BinExp $1 GT $3 }
+    | Exp ">=" Exp       { BinExp $1 GTE $3 }
     | Var                { VarExp $1 }
     | id '(' ExpList ')' { AppExp $1 $3 }
     | '(' Exp ')'        { $2 }
@@ -131,9 +140,9 @@ VarId : id { VarId $1 }
 TypeId : Type { TypeId $1 }
 
 Type :: { Type }
-: id { SimpleType $1 }
-| "array of" Type { ArrayType $2 }
+: "array of" Type { ArrayType $2 }
 | "record of" '{'  VarDeclList '}' { RecordType $3 }
+| id { SimpleType $1 }
 
 Var :: { Var }
 : VarId { Var $1 }
@@ -157,6 +166,11 @@ parseError e = do
       ]
   where
     formatLocationInfo (AlexPn _ l c) = concat [show l, ":", show c]
+
+assert :: String -> Bool -> a -> Alex a
+assert name cond x
+    | cond = return x
+    | otherwise = alexError $ "Assertion failed: " ++ name
 
 parseCode s = runAlex s parseProgram
 

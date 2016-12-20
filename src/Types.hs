@@ -7,7 +7,11 @@ data BinOp
     | Mul
     | LAnd
     | LOr
-    | LEq
+    | Eq
+    | LT
+    | LTE
+    | GT
+    | GTE
     deriving (Show, Eq)
 
 data UnOp
