@@ -1,0 +1,53 @@
+* Introduction
+
+For my BSc thesis, I(along with a classmate) wrote a compiler in C.
+We had hoped to write it in Haskell, but unfortunately, there weren't any professors
+that had enough experience with Haskell that they felt comfortable reviewing our code.
+So we used C.
+
+Writing a compiler in C is ... painful, to say the least. We ignored a lot of details, like
+cleaning up memory after creating and working with the AST, and we made semi-heavy use of
+the C preprocessor in order to simplify the creation of sum types and dealing with them.
+
+The times I looked at the problem I was solving at that time and thought "this would be so much
+more elegant in Haskell" or "I wouldn't even be writing this horrible boilerplate if this was
+Haskell" are too many to count. For this reason, I am hoping to rewrite the compiler in Haskell.
+
+Well, for that reason and also because writing compilers turned out to be really fun, and writing
+Haskell is really fun, so it's a good combination.
+
+* Details
+** Language
+The language is called Tony and is a minimal C-like language.
+The features listed below, and the grammar, may not truthfully
+represent the language that the compiler compiles. This is because
+this language is very uinteresting, and I am going to be exploring
+different things while writing this compiler, which may involve
+adding, removing or changing the built-in features or the grammar.
+
+*** Features
+- Built in types:
+  - ~int~
+  - ~bool~
+  - arrays
+  - record types
+- Arithmetic, logical operators
+- If, while
+- functions, also nested functions
+*** Grammar    
+[[file:grammar1.png][Grammar part 1]]
+[[file:grammar2.png][Grammar part 2]]
+
+** Libraries, etc
+The lexer is generated using ~alex~ and the parser using ~happy~.
+* Building
+
+~stack build --exec hsc~ to build and run it. It takes input from standard input.
+In its current state, it takes the input and tries to parse it. If it succeeds,
+it is converted to a ~dot~ representation, and then a shell script(via ~shelly~) 
+converts the result to a PNG and shows it. Modify to use your own image viewer.
+
+~stack test~ will run the tests. Currently, all input files provided by my professor
+are read and parsing is attempted. All tests are currently passing except for
+one that tests whether the compiler can handle nested comments.
+The test data is found in the ~test/data~ subdirectory.
