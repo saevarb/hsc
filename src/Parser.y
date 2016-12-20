@@ -29,6 +29,10 @@ true        { TokenTrue }
 false       { TokenFalse }
 null        { TokenNull }
 type        { TokenType }
+func        { TokenFunc }
+end         { TokenEnd }
+"record of" { TokenRecord }
+"array of"  { TokenArray }
 "of length" { TokenOfLength }
 '='         { TokenAssign }
 '+'         { TokenPlus }
@@ -68,11 +72,15 @@ DeclList :: { [Decl] }
 Decl :: { Decl }
 : var VarDeclList { VarDecls $2 } 
 | TypeDecl { $1 }
+| FuncDecl { $1 }
+
+FuncDecl :: { Decl }
+: func VarId '(' VarDeclList ')' ':' Type Body end VarId {  FunDecl $2 $4 $8 $7 }
 
 VarDeclList :: { [Decl] }
 : VarType { [$1] }
 | VarDeclList ',' VarType { $3 : $1 }
-|  { [] }
+| { [] }
 
 VarType :: { Decl }
 VarType : VarId ':' TypeId { VarDecl $1 $3 }
@@ -120,7 +128,12 @@ Exp :: { Exp }
     | num                { ConstExp $1 }
 
 VarId : id { VarId $1 }
-TypeId : id { TypeId $1 }
+TypeId : Type { TypeId $1 }
+
+Type :: { Type }
+: id { SimpleType $1 }
+| "array of" Type { ArrayType $2 }
+| "record of" '{'  VarDeclList '}' { RecordType $3 }
 
 Var :: { Var }
 : VarId { Var $1 }

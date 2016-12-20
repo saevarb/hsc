@@ -18,4 +18,3 @@ canParse f =
         case res of
             Left e -> assertFailure e
             Right _ -> return ()
-    

@@ -8,17 +8,17 @@ data BinOp
     | LAnd
     | LOr
     | LEq
-    deriving Show
+    deriving (Show, Eq)
 
 data UnOp
     = LNot
-    deriving Show
+    deriving (Show, Eq)
 
 data Var
     = Var Identifier
     | VarOffset Identifier Exp
     | VarDot Identifier Var
-    deriving (Show)
+    deriving (Show, Eq)
 
 data Exp
     = BinExp Exp BinOp Exp
@@ -29,7 +29,7 @@ data Exp
     | ConstExp Integer
     | BoolExp Bool
     | NullExp
-    deriving Show
+    deriving (Show, Eq)
 
 data Stmt
     = RetStmt Exp
@@ -39,19 +39,25 @@ data Stmt
     | IfStmt Exp Stmt (Maybe Stmt)
     | WhileStmt Exp Stmt
     | StmtList [Stmt]
-    deriving Show
+    deriving (Show, Eq)
 
 data Decl
     = VarDecl Identifier Identifier
     | VarDecls [Decl]
     | TypeDecl Identifier Identifier
-    | FunDecl
-    deriving Show
+    | FunDecl Identifier [Decl] Body Type
+    deriving (Show, Eq)
 
 data Body = Body [Decl] [Stmt]
-    deriving Show
+    deriving (Show, Eq)
 
 data Identifier
-    = TypeId String
+    = TypeId Type
     | VarId String
-    deriving Show
+    deriving (Show, Eq)
+
+data Type
+    = SimpleType String
+    | ArrayType Type
+    | RecordType [Decl]
+    deriving (Show, Eq)
