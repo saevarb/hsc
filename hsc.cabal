@@ -28,5 +28,16 @@ executable hsc
                      , megaparsec
                      , mtl
                      , random
-                     , text >= 1.2.2.1
                      , shelly
+                     , text >= 1.2.2.1
+
+test-suite hsc-test
+  type: exitcode-stdio-1.0
+  default-language:    Haskell2010
+  ghc-options:         -main-is Test
+  main-is:             Test.hs
+  hs-source-dirs:      test
+  build-depends:       base
+                     , tasty
+                     , tasty-hunit
+                     , tasty-quickcheck
