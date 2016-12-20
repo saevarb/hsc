@@ -31,7 +31,7 @@ assertRight f (Left e) = assertFailure $ f e
 
 assertLeft _ (Left e) = return ()
 assertLeft f (Right e) = assertFailure $ f e
-    
+
 parseFile f = do
         contents <- readFile f
         return $ parseCode contents
