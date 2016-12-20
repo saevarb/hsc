@@ -145,4 +145,6 @@ parseError e = do
   where
     formatLocationInfo (AlexPn _ l c) = concat [show l, ":", show c]
 
+parseCode s = runAlex s parseProgram
+
 }

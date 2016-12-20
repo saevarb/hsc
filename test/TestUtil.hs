@@ -1,4 +1,4 @@
-module Util where
+module TestUtil where
 
 testFiles :: [String]
 testFiles =

@@ -14,11 +14,23 @@ cabal-version:       >=1.10
 
 
 executable hsc
-  hs-source-dirs:      src
+  hs-source-dirs:      exe
   main-is:             Main.hs
   default-language:    Haskell2010
-  other-modules:       Parser
-                     , Types
+  build-depends:       MonadRandom
+                     , array
+                     , base
+                     , megaparsec
+                     , mtl
+                     , random
+                     , shelly
+                     , text >= 1.2.2.1
+                     , hsc
+
+library
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  exposed-modules:     Types
                      , Lexer
                      , Parser
                      , Util
@@ -31,13 +43,16 @@ executable hsc
                      , shelly
                      , text >= 1.2.2.1
 
+
 test-suite hsc-test
   type: exitcode-stdio-1.0
   default-language:    Haskell2010
   ghc-options:         -main-is Test
   main-is:             Test.hs
   hs-source-dirs:      test
+  other-modules:       TestUtil
   build-depends:       base
                      , tasty
                      , tasty-hunit
                      , tasty-quickcheck
+                     , hsc
