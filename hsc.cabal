@@ -21,7 +21,12 @@ executable hsc
                      , Types
                      , Lexer
                      , Parser
-  build-depends:       base >= 4.7 && < 5
-                     , megaparsec
+                     , Util
+  build-depends:       MonadRandom
                      , array
+                     , base
+                     , megaparsec
                      , mtl
+                     , random
+                     , text >= 1.2.2.1
+                     , shelly
