@@ -3,6 +3,7 @@ import Parser
 import Lexer
 
 import Types
+import Util
 
 main :: IO ()
 main = do
@@ -11,7 +12,9 @@ main = do
     -- putStrLn "Lexed:"
     -- print lexed
     case parsed of
-        Right t ->
+        Right t -> do
+            visualizeAndShow t
+            putStrLn "============"
             printTree t
         Left err ->
             putStr err
