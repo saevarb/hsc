@@ -53,6 +53,7 @@ end         { TokenEnd }
 '!'         { TokenNot }
 '|'         { TokenPipe }
 "=="        { TokenEq }
+"!="        { TokenNotEq }
 "||"        { TokenOr }
 "&&"        { TokenAnd }
 '<'         { TokenLT }
@@ -122,6 +123,7 @@ Exp :: { Exp }
     | Exp "||" Exp       { BinExp $1 LOr $3 }
     | Exp "&&" Exp       { BinExp $1 LAnd $3 }
     | Exp "==" Exp       { BinExp $1 Eq $3 }
+    | Exp "!=" Exp       { BinExp $1 NotEq $3 }
     | Exp '<' Exp        { BinExp $1 LT $3 }
     | Exp "<=" Exp       { BinExp $1 LTE $3 }
     | Exp '>' Exp        { BinExp $1 GT $3 }
@@ -146,8 +148,8 @@ Type :: { Type }
 
 Var :: { Var }
 : VarId { Var $1 }
-| VarId '[' Exp ']' { VarOffset $1 $3 }
-| VarId '.' Var { VarDot $1 $3 }
+| Var '[' Exp ']' { VarOffset $1 $3 }
+| Var '.' Var { VarDot $1 $3 }
 
 {
 

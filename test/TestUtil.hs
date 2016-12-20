@@ -1,12 +1,11 @@
 module TestUtil where
 
-testFiles :: [String]
-testFiles =
+validTestFiles :: [String]
+validTestFiles =
     [ "C_ErrAssignToType.src"
     , "C_ErrFuncParamsInvalidType.src"
     , "C_ErrFuncParamsTooFew.src"
     , "C_ErrFuncParamsTooMany.src"
-    , "C_ErrInvalidToken.src"
     , "C_ErrTypeLoop.src"
     , "C_ErrUnmatchedBeginComment.src"
     , "C_NullWrong.src"
@@ -63,4 +62,9 @@ testFiles =
     , "R_ErrRuntimeNegArraySize.src"
     , "R_ErrRuntimeNullPointer.src"
     , "R_ErrRuntimeOutOfMem.src"
+    ]
+
+invalidTestFiles :: [String]
+invalidTestFiles =
+    ["C_ErrInvalidToken.src"
     ]

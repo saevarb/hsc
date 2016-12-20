@@ -8,6 +8,7 @@ data BinOp
     | LAnd
     | LOr
     | Eq
+    | NotEq
     | LT
     | LTE
     | GT
@@ -20,8 +21,8 @@ data UnOp
 
 data Var
     = Var Identifier
-    | VarOffset Identifier Exp
-    | VarDot Identifier Var
+    | VarOffset Var Exp
+    | VarDot Var Var
     deriving (Show, Eq)
 
 data Exp
